@@ -195,6 +195,7 @@ const addUsers = (req, res) => {
       res.status(500).send("Error saving the movie");
     });
 };
+
 const updateUsers = (req, res) => {
   const id = parseInt(req.params.id);
   const { firstname, lastname, email, city, language, hashedPassword } = req.body;
@@ -233,7 +234,7 @@ const deleteUsersById = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send("Error deleting the movie");
+      res.status(500).send("Error deleting the user");
     });
 };
 
@@ -247,6 +248,24 @@ const getUsersById = (req, res) => {
         res.json(users[0]);
       }else{
         res.status(404).send("Not Found");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
+  const  email  = req.body.email;
+  console.log(email);
+  database
+    .query(" select * from users where email = ?",[email])
+    .then(([user]) => {
+      if (user[0] != null){
+        req.user=user[0];
+        next();
+      }else{
+        res.status(401).send("Not Found");
       }
     })
     .catch((err) => {
@@ -284,4 +303,5 @@ module.exports = {
   updateUsers,
   deleteMovieById,
   deleteUsersById,
+  getUserByEmailWithPasswordAndPassToNext
 };
